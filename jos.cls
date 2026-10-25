@@ -14,7 +14,7 @@
 %%    奇数页为 “作者 等: 题目 | 页码”
 %% ======================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{jos}[2026/10/25 v1.0 Journal of Software (Ruan Jian Xue Bao) template]
+\ProvidesClass{jos}[2026/10/25 v1.1 Journal of Software (Ruan Jian Xue Bao) template]
 
 %% ---- 选项：未知选项（如 fontset=windows / mac / fandol）传给 ctex ----
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{ctex}}
@@ -30,6 +30,54 @@
 \IfFontExistsTF{Times New Roman}
   {\setmainfont{Times New Roman}}
   {\setmainfont{TeX Gyre Termes}}
+
+%% ---- 中文缺字自动补字 ----
+%% 仿宋、楷体以及 Fandol 字体只收 GB2312 常用字，人名中的“喆、堃、珺、玥”等字会缺失。
+%% 开启 xeCJK 的 AutoFallBack：当前字体没有某字时，自动改用系统中字库更全的同类字体。
+%% 回退字体按顺序取第一个已安装的（Overleaf 有 Noto CJK；macOS 有宋体-简/苹方；Windows 有宋体/微软雅黑）。
+\ExplSyntaxOn
+\tl_new:N \l__jos_fb_tl
+\clist_new:N \l__jos_fb_clist
+\cs_new_protected:Npn \__jos_pick_font:Nn #1#2
+  {
+    \tl_clear:N #1
+    \clist_set:Nx \l__jos_fb_clist {#2}
+    \clist_map_inline:Nn \l__jos_fb_clist
+      { \IfFontExistsTF {##1} { \tl_set:Nn #1 {##1} \clist_map_break: } { } }
+  }
+\cs_new_protected:Npn \__jos_set_fallback:nn #1#2
+  {
+    \__jos_pick_font:Nn \l__jos_fb_tl {#2}
+    \tl_if_empty:NF \l__jos_fb_tl
+      { \exp_args:NnV \setCJKfallbackfamilyfont {#1} \l__jos_fb_tl }
+  }
+\clist_const:Nn \c__jos_fb_song_clist
+  { Noto~Serif~CJK~SC, Source~Han~Serif~SC, Songti~SC, STSong, SimSun, NSimSun }
+\clist_const:Nn \c__jos_fb_hei_clist
+  { Noto~Sans~CJK~SC, Source~Han~Sans~SC, PingFang~SC, Heiti~SC, STHeiti, Microsoft~YaHei, SimHei }
+\cs_if_exist:NT \setCJKfallbackfamilyfont
+  {
+    \xeCJKsetup { AutoFallBack = true }
+    \__jos_set_fallback:nn { \CJKrmdefault } { \c__jos_fb_song_clist }
+    \__jos_set_fallback:nn { \CJKsfdefault } { \c__jos_fb_hei_clist }
+    \__jos_set_fallback:nn { zhsong } { \c__jos_fb_song_clist }
+    \__jos_set_fallback:nn { zhhei }  { \c__jos_fb_hei_clist }
+    \__jos_set_fallback:nn { zhkai }
+      { Kaiti~SC, STKaiti, KaiTi, \c__jos_fb_song_clist }
+    \__jos_set_fallback:nn { zhfs }
+      { STFangsong, FangSong, Kaiti~SC, STKaiti, KaiTi, \c__jos_fb_song_clist }
+  }
+%% 手动指定补字字体（导言区使用），例如 \setjosfallback{Songti SC}
+\NewDocumentCommand \setjosfallback { m }
+  {
+    \cs_if_exist:NT \setCJKfallbackfamilyfont
+      {
+        \xeCJKsetup { AutoFallBack = true }
+        \clist_map_inline:nn { \CJKrmdefault, \CJKsfdefault, zhsong, zhhei, zhkai, zhfs }
+          { \setCJKfallbackfamilyfont {##1} {#1} }
+      }
+  }
+\ExplSyntaxOff
 
 %% ---- 常用宏包 ----
 \RequirePackage{amsmath,amssymb,amsthm}
@@ -157,7 +205,7 @@
 \def\jos@entitle{}\def\jos@enauthors{}\def\jos@enaffils{}
 \def\jos@enabstract{}\def\jos@enkeywords{}
 \def\jos@fund{}\def\jos@dates{}
-\def\jos@headauthor{作者~等}\def\jos@headtitle{}
+\def\jos@headauthor{作者\hspace{0.25em}等}\def\jos@headtitle{}
 \def\jos@journalinfo{Vol.32, No.7, July 2021}
 \def\jos@doi{10.13328/j.cnki.jos.000000}
 \def\jos@startpage{1}
@@ -181,12 +229,91 @@
 \newcommand\enkeywords[1]{\def\jos@enkeywords{#1}}
 \newcommand\fund[1]{\def\jos@fund{#1}}
 \newcommand\dates[3]{\def\jos@dates{收稿时间: #1; 修改时间: #2; 采用时间: #3}}
-\newcommand\headauthor[1]{\def\jos@headauthor{#1}}
+\newcommand\headauthor[1]{\def\jos@headauthor{#1}}   % 例：\headauthor{张三\hspace{0.25em}等}（汉字间直接打空格会被 xeCJK 删除）
 \newcommand\headtitle[1]{\def\jos@headtitle{#1}}
 \newcommand\journalinfo[1]{\def\jos@journalinfo{#1}}
 \def\doi#1{\def\jos@doi{#1}}
 \newcommand\startpage[1]{\def\jos@startpage{#1}}
 \AtBeginDocument{\setcounter{page}{\jos@startpage}}
+
+%% ---- 作者行字体：整行统一 ----
+%% 作者行用仿宋。若姓名中有仿宋字库缺的字（如“喆”），逐字补字会造成一行里字体不一。
+%% 这里先检查 \author 中的全部汉字，从下列候选字体中选第一个能显示所有字的，整行都用它：
+%% 仿宋（Word 同款仿宋 / 华文仿宋 / 方正仿宋）→ 楷体 → 宋体。也可手动指定：\setjosauthorfont{字体名}
+\ExplSyntaxOn
+\clist_new:N \g__jos_authorfont_clist
+\clist_gset:Nn \g__jos_authorfont_clist
+  {
+    FangSong, STFangsong, FZFangSong-Z02S, FZFangSong-Z02, FandolFang-Regular.otf,
+    KaiTi, Kaiti~SC, STKaiti, FZKai-Z03S, FandolKai-Regular.otf,
+    SimSun, Songti~SC, STSong, Noto~Serif~CJK~SC, Source~Han~Serif~SC, FandolSong-Regular.otf
+  }
+\tl_new:N \g__jos_authorfont_tl
+\tl_new:N \l__jos_authorchars_tl
+\bool_new:N \g__jos_cover_bool
+\NewDocumentCommand \setjosauthorfont { m }
+  { \clist_gset:Nn \g__jos_authorfont_clist {#1} }
+%% 检查字体 #1 是否包含 #2 中的全部字符
+\cs_new_protected:Npn \__jos_font_covers:nn #1#2
+  {
+    \bool_gset_false:N \g__jos_cover_bool
+    \IfFontExistsTF {#1}
+      {
+        \group_begin:
+          \fontspec {#1}
+          \bool_gset_true:N \g__jos_cover_bool
+          \tl_map_inline:nn {#2}
+            { \iffontchar \font `##1 \scan_stop: \else: \bool_gset_false:N \g__jos_cover_bool \fi: }
+        \group_end:
+      }
+      { }
+  }
+%% 从 \author{...} 中取出汉字（跳过命令、上标编号、标点等）
+\cs_new_protected:Npn \__jos_collect_cjk:N #1
+  {
+    \tl_clear:N \l__jos_authorchars_tl
+    \tl_map_inline:Nn #1
+      {
+        \tl_if_single_token:nT {##1}
+          {
+            \token_if_cs:NF ##1
+              {
+                \int_compare:nNnT { `##1 } > { "2E7F }
+                  { \tl_put_right:Nn \l__jos_authorchars_tl {##1} }
+              }
+          }
+      }
+  }
+\cs_new_protected:Npn \__jos_choose_authorfont:
+  {
+    \__jos_collect_cjk:N \jos@authors
+    \tl_gclear:N \g__jos_authorfont_tl
+    \tl_if_empty:NF \l__jos_authorchars_tl
+      {
+        \clist_map_inline:Nn \g__jos_authorfont_clist
+          {
+            \exp_args:NnV \__jos_font_covers:nn {##1} \l__jos_authorchars_tl
+            \bool_if:NT \g__jos_cover_bool
+              { \tl_gset:Nn \g__jos_authorfont_tl {##1} \clist_map_break: }
+          }
+        \tl_if_empty:NTF \g__jos_authorfont_tl
+          { \msg_warning:nn { jos } { no-author-font } }
+          { \msg_info:nnV { jos } { author-font } \g__jos_authorfont_tl }
+      }
+  }
+\msg_new:nnn { jos } { author-font } { 作者行使用字体:~#1 }
+\msg_new:nnn { jos } { no-author-font }
+  { 候选字体都不能完整显示作者姓名,作者行将逐字补字.可用~\token_to_str:N \setjosauthorfont {字体名}~手动指定. }
+\cs_new_protected:Npn \jos@authorfont
+  {
+    \cs_if_exist:NT \CJKfontspec
+      {
+        \__jos_choose_authorfont:
+        \tl_if_empty:NF \g__jos_authorfont_tl
+          { \exp_args:NV \CJKfontspec \g__jos_authorfont_tl }
+      }
+  }
+\ExplSyntaxOff
 
 %% 灰底引用格式框（Word 中底纹为 F2F2F2）
 \definecolor{josgray}{HTML}{F2F2F2}
@@ -209,7 +336,7 @@
    \ifx\jos@fund\@empty\else\textsuperscript{$\ast$}\fi\par}
   %% 作者 12pt 仿宋，横向压缩
   \vspace{8pt}%
-  {\fangsong\josfont{12pt}{16pt}\scalebox{0.66}[1]{\jos@authors}\par}
+  {\fangsong\jos@authorfont\josfont{12pt}{16pt}\scalebox{0.66}[1]{\jos@authors}\par}
   \vspace{10pt}%
   %% 单位 8pt
   {\songti\josfont{8pt}{12pt}\jos@affils
@@ -295,19 +422,47 @@
 %%  作者简介（文末，每行两人：照片 + 简介）
 %% ======================================================================
 \newcounter{jos@bio}
+%% 版式取自 Word：每行两人，照片栏 20.2mm（照片约 17mm x 22mm，居中）+ 文字栏 51.6mm（左右各留 1.5mm），
+%% 两人之间空 7.7mm，整表宽 151.4mm 居中；文字 7.5pt（六号）宋体，姓名黑体，行距最小 12pt
 \newenvironment{biographies}{%
-  \par\vspace{12pt}\setcounter{jos@bio}{0}\noindent\ignorespaces}
-  {\par}
-\newcommand\bio[2]{%
-  \stepcounter{jos@bio}%
-  \begin{minipage}[t]{0.49\linewidth}
-    \begin{minipage}[t]{17mm}\vspace{0pt}%
-      \includegraphics[width=17mm,height=22mm,keepaspectratio=false]{#1}%
-    \end{minipage}\hspace{3mm}%
-    \begin{minipage}[t]{\dimexpr\linewidth-20mm}\vspace{0pt}%
-      \songti\josfont{9pt}{14.25pt}#2%
+  \par\vspace{12pt}\setcounter{jos@bio}{0}%
+  \begingroup\raggedright\setlength\parindent{0pt}%
+  \let\par\relax   % 作者之间的空行不打断排版；换行由 \bio 自己控制
+  \ignorespaces}
+  {\@@par\endgroup\par}
+%% 用法：\bio{照片文件}{姓名}{(1983-),男,博士,...}   姓名自动为黑体
+%%   或：\bio{照片文件}{整段简介}                    （兼容旧写法，不单独处理姓名）
+%% 不用 xparse 的 g 型参数（新版 LaTeX 中需额外加载 xparse），这里自己判断后面是否还有一个 {…}
+\ExplSyntaxOn
+\cs_new_protected:Npn \bio #1#2
+  {
+    \peek_catcode_ignore_spaces:NTF \c_group_begin_token
+      { \__jos_bio:nnn {#1} {#2} }
+      { \__jos_bio:nnn {#1} { } {#2} }
+  }
+\cs_new_protected:Npn \__jos_bio:nnn #1#2#3
+  {
+    \stepcounter{jos@bio}
+    % 每行第一人从固定位置开始（使 151.4mm 宽的整组在版心居中）；第二人与第一人相隔 7.7mm
+    % 作者数为单数时，最后一人自然排在左栏
+    \int_if_odd:nTF { \value{jos@bio} }
+      { \noindent \hspace*{ \dim_eval:n { ( \linewidth - 151.4mm ) / 2 } } }
+      { \hspace{7.7mm} }
+    \begin{minipage}[t]{20.2mm} \vspace{0pt} \centering
+      \includegraphics[width=17mm,height=22mm,keepaspectratio=false]{#1}
     \end{minipage}
-  \end{minipage}%
-  \ifodd\value{jos@bio}\hfill\else\par\vspace{8pt}\noindent\fi\ignorespaces}
+    \begin{minipage}[t]{51.6mm} \vspace{0pt}
+      \hspace*{1.5mm}
+      \begin{minipage}[t]{48.6mm} \vspace{0pt}
+        % 文字两端对齐
+        \leftskip=0pt \rightskip=0pt \parfillskip=0pt~plus~1fil \scan_stop:
+        \songti \josfont{7.5pt}{12pt}
+        \tl_if_blank:nF {#2} { { \heiti #2 } } #3 \par
+      \end{minipage}
+    \end{minipage}
+    \int_if_odd:nF { \value{jos@bio} } { \tex_par:D \vspace{2mm} }
+    \ignorespaces
+  }
+\ExplSyntaxOff
 
 \endinput
