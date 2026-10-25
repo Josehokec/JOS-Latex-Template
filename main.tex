@@ -1,0 +1,172 @@
+%% ======================================================================
+%%  《软件学报》LaTeX 模板 —— 示例文件
+%%  编译：XeLaTeX（Overleaf: Menu → Compiler → XeLaTeX）
+%%  想用与 Word 同款的系统中文字体（宋体/黑体/楷体/仿宋），按系统选择：
+%%      Windows: \documentclass[fontset=windows]{jos}   % 宋体 SimSun / 黑体 SimHei / 楷体 KaiTi / 仿宋 FangSong
+%%      macOS:   \documentclass[fontset=mac]{jos}       % 华文宋体 / 黑体 / 华文楷体 / 华文仿宋
+%%  不加选项时，Overleaf 等 Linux 环境默认用 Fandol 字体（FandolKai 也是楷体）。
+%%  注：《软件学报》中文正文使用半角标点“,”“.”“:”“;”与“()”，示例遵循此约定。
+%% ======================================================================
+\documentclass{jos}
+
+%% ---------- 页眉与期刊信息（录用后由编辑部提供，投稿时可保持默认）----------
+\startpage{2204}                                  % 起始页码
+\journalinfo{Vol.32, No.7, July 2021}             % 偶数页页眉中的卷期
+\doi{10.13328/j.cnki.jos.000000}
+\headauthor{张三~等}                              % 奇数页页眉：作者 等
+\headtitle{论文中文题目}                          % 奇数页页眉：题目
+
+%% ---------- 中文信息 ----------
+\title{论文中文题目: 不超过 20 个汉字}
+\author{张三\affmark{1},\enspace 李四\affmark{1},\enspace 王五\affmark{2},\enspace 赵六\affmark{3}}
+\affiliation{1}{某某大学\enspace 计算机科学与工程学院,江苏\enspace 南京\quad 210094}
+\affiliation{2}{某某大学\enspace 航天学院,江苏\enspace 南京\quad 210016}
+\affiliation{3}{某某大学\enspace 计算机科学与技术学院,江苏\enspace 南京\quad 211106}
+\corresponding{王五}{wangwu@example.edu.cn}
+
+\cnabstract{摘要应包括研究的目的、方法、结果和结论,一般为 200$\sim$300 字.
+摘要内容使用 9pt 楷体,“摘\ 要”标签使用黑体.这是一段用于展示排版效果的示例文字,
+可直接替换为论文实际内容.这是一段用于展示排版效果的示例文字,可直接替换为论文实际内容.}
+\cnkeywords{关键词一;关键词二;关键词三}
+\clc{TP311}
+
+\cncitation{张三,李四,王五,赵六.论文中文题目.软件学报,2021,32(7):2204$-$2221.
+  http://www.jos.org.cn/1000-9825/0000.htm}
+\encitation{Zhang S, Li S, Wang W, Zhao L. English title of the paper.
+  Ruan Jian Xue Bao/Journal of Software, 2021, 32(7): 2204$-$2221 (in Chinese).
+  http://www.jos.org.cn/1000-9825/0000.htm}
+
+%% ---------- 英文信息 ----------
+\entitle{English Title of the Paper}
+\enauthor{ZHANG San\affmark{1},\enspace LI Si\affmark{1},\enspace WANG Wu\affmark{2},\enspace ZHAO Liu\affmark{3}}
+\enaffiliation{1}{School of Computer Science and Engineering, XX University, Nanjing 210094, China}
+\enaffiliation{2}{College of Aerospace Engineering, XX University, Nanjing 210016, China}
+\enaffiliation{3}{College of Computer Science and Technology, XX University, Nanjing 211106, China}
+\enabstract{The English abstract should correspond to the Chinese abstract. It is typeset in
+7.5pt Times with 11.7pt line spacing. This is placeholder text that shows the layout of the
+abstract block, and it can be replaced by the actual content of the paper. This is placeholder
+text that shows the layout of the abstract block.}
+\enkeywords{keyword one; keyword two; keyword three}
+
+%% ---------- 首页脚注 ----------
+\fund{国家自然科学基金 (61906090, 61773208); 江苏省自然科学基金 (BK20191287)}
+\dates{2020-04-13}{2020-10-26}{2020-12-14}
+
+\begin{document}
+\maketitle
+
+%% 《软件学报》引言不加标题、不编号,正文从第 1 节开始编号
+引言部分直接书写,不加“引言”标题.正文使用 9pt 宋体与 Times New Roman,行距 14.25pt,
+首行缩进 2 字.引用文献使用上标形式\cite{ref1},多篇文献会自动合并\cite{ref1,ref2,ref3}.
+若需非上标形式,可写作“文献\inlinecite{ref2}指出……”.
+
+图\ref{fig:framework}展示了插图的写法:图题位于图下方,使用 9pt 宋体,居中.
+这是一段用于展示排版效果的示例文字,可直接替换为论文实际内容.这是一段用于展示排版效果的示例文字,
+可直接替换为论文实际内容.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\linewidth,height=4cm]{example-image}
+  \caption{方法框架图}
+  \label{fig:framework}
+\end{figure}
+
+\section{相关工作}
+一级标题为 10.5pt 黑体,编号加粗.这是一段用于展示排版效果的示例文字,可直接替换为论文实际内容.
+这是一段用于展示排版效果的示例文字,可直接替换为论文实际内容.
+
+\subsection{二级标题}
+二级标题为 9pt 黑体.这是一段用于展示排版效果的示例文字,可直接替换为论文实际内容.
+
+\subsubsection{三级标题}
+三级标题为 9pt 宋体.行内公式如 $p(\boldsymbol{z}\mid\boldsymbol{x})$,行间公式如式(\ref{eq:bayes}):
+\begin{equation}
+  p(\boldsymbol{z}\mid\boldsymbol{x})=\frac{p(\boldsymbol{x}\mid\boldsymbol{z})\,p(\boldsymbol{z})}{p(\boldsymbol{x})}.
+  \label{eq:bayes}
+\end{equation}
+
+\section{方法}
+\begin{definition}[示例定义]
+定义、定理等环境的标签使用黑体,内容使用宋体.
+\end{definition}
+
+\begin{theorem}
+这是一个定理的示例.
+\end{theorem}
+\begin{proof}
+这是证明的示例.
+\end{proof}
+
+列表采用“(1)”编号:
+\begin{enumerate}
+  \item 第一步,这是一段用于展示排版效果的示例文字;
+  \item 第二步,这是一段用于展示排版效果的示例文字.
+\end{enumerate}
+
+\section{实验分析}
+表\ref{tab:data}为三线表示例:表题位于表上方,黑体 9pt,编号加粗;表内文字 7.5pt.
+
+\begin{table}[htbp]
+  \centering
+  \caption{实验数据集}
+  \label{tab:data}
+  \begin{tabular}{ccccc}
+    \toprule
+    分组 & 项目 & 度量数 & 模块数 & 缺陷比例(\%) \\
+    \midrule
+    \multirow{2}{*}{NASA} & CM1 & 37 & 327 & 12.84 \\
+                          & MW1 & 37 & 253 & 10.67 \\
+    SOFTLAB & AR1 & 29 & 121 & 7.44 \\
+    AEEEM   & EQ  & 61 & 324 & 39.81 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+图\ref{fig:sub}为子图示例,子图题为 7.5pt.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.45\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.2cm]{example-image-a}
+    \caption{PDE$\Rightarrow$PC4}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.45\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,height=3.2cm]{example-image-b}
+    \caption{AR6$\Rightarrow$PC4}
+  \end{subfigure}
+  \caption{不同权重下的性能变化}
+  \label{fig:sub}
+\end{figure}
+
+\section{总\hspace{1em}结}
+这是一段用于展示排版效果的示例文字,可直接替换为论文实际内容.
+
+%% ---------- 参考文献：英文 References ----------
+%% 也可改用 BibTeX: \bibliographystyle{unsrtnat}\bibliography{refs}（版式相同,条目格式取决于 bst）
+\begin{thebibliography}{99}
+\bibitem{ref1} Hall T, Beecham S, Bowes D, Gray D, Counsell S. A systematic literature review on fault
+  prediction performance in software engineering. IEEE Trans. on Software Engineering, 2012, 38(6): 1276$-$1304.
+\bibitem{ref2} Chen X, Gu Q, Liu WS, Liu SL, Ni C. Survey of static software defect prediction. Ruan Jian
+  Xue Bao/Journal of Software, 2016, 27(1): 1$-$25 (in Chinese with English abstract).
+  http://www.jos.org.cn/1000-9825/4923.htm
+\bibitem{ref3} Kingma DP, Welling M. Auto-encoding variational Bayes. In: Proc. of the 2nd Int'l Conf.
+  on Learning Representations. 2014.
+\end{thebibliography}
+
+%% ---------- 附中文参考文献（编号与上面一致）----------
+\begin{cnreferences}
+\cnbibitem{2} 陈翔,顾庆,刘望舒,刘树龙,倪超.静态软件缺陷预测方法研究.软件学报,2016,27(1):1$-$25.
+  http://www.jos.org.cn/1000-9825/4923.htm
+\end{cnreferences}
+
+%% ---------- 作者简介 ----------
+\begin{biographies}
+\bio{example-image-a}{张三(1983$-$),男,博士,副教授,CCF 高级会员,主要研究领域为机器学习,数据挖掘.}
+\bio{example-image-b}{李四(1995$-$),男,硕士生,主要研究领域为软件缺陷预测.}
+\bio{example-image-c}{王五(1981$-$),女,博士,副研究员,CCF 专业会员,主要研究领域为机器学习,软件安全性.}
+\bio{example-image}{赵六(1965$-$),男,博士,教授,博士生导师,CCF 杰出会员,主要研究领域为软件工程.}
+\end{biographies}
+
+\end{document}
