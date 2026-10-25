@@ -262,9 +262,10 @@
 \fancypagestyle{josmain}{%
   \fancyhf{}%
   \renewcommand\headrulewidth{0pt}%
-  \fancyhead[L]{\josfont{9pt}{11pt}\jos@ifjournalside
+  %% 页眉 9pt（小五）；中文为楷体，西文为 Times（Journal of Software 斜体）
+  \fancyhead[L]{\kaishu\josfont{9pt}{11pt}\jos@ifjournalside
     {\thepage}{\jos@headauthor: \jos@headtitle}}%
-  \fancyhead[R]{\josfont{9pt}{11pt}\jos@ifjournalside
+  \fancyhead[R]{\kaishu\josfont{9pt}{11pt}\jos@ifjournalside
     {\textit{Journal of Software}~软件学报~\jos@journalinfo}{\thepage}}}
 \fancypagestyle{josfirst}{\fancyhf{}\renewcommand\headrulewidth{0pt}}
 \pagestyle{josmain}
