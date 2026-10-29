@@ -164,9 +164,16 @@
 \renewcommand\thesubfigure{\alph{subfigure}}
 \renewcommand\thesubtable{\alph{subtable}}
 
+
 %% 表格内部文字 7.5pt；三线表：顶/底线 1pt，栏目线 0.5pt
 \newcommand\tablefont{\songti\josfont{7.5pt}{10pt}}
-\AtBeginEnvironment{table}{\tablefont}        % 表格内容自动为 7.5pt
+%% 表格内容自动为 7.5pt（六号）。
+%% 注意：不能用 \AtBeginEnvironment{table}{...}，因为 LaTeX 开始排浮动体时
+%% 会在 \@floatboxreset 中执行 \normalsize，把字号重置回正文的 9pt。
+%% 这里把设置追加到 \@floatboxreset 之后，并只对表格（\@captype 为 table）生效；
+%% table、table*、float 宏包的 [H] 都会经过这一步。
+\def\jos@tabletype{table}
+\g@addto@macro\@floatboxreset{\ifx\@captype\jos@tabletype\tablefont\fi}
 \setlength\heavyrulewidth{1pt}
 \setlength\lightrulewidth{0.5pt}
 \setlength\cmidrulewidth{0.4pt}
